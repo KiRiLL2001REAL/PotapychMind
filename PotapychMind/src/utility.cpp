@@ -15,3 +15,8 @@ const std::string Utility::getWorkingDirectory()
 	free(buffer);
 	return workingDirectory;
 }
+
+const std::wstring Utility::to_wstring(const std::string& str)
+{
+	return std::wstring(str.begin(), str.end());
+}
