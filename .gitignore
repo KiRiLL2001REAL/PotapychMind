@@ -1,0 +1,55 @@
+# gitignore
+
+!PotapychMind/resources
+
+# Logs
+*.log
+# anywhere/my.log, NOT my.logs | my.log.tmp
+
+# Only relative to .gitignore file directory
+# /first_example/
+# second/example/
+.vs/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# build and etc
+**/x64/**/*.recipe
+**/x64/**/*.ilk
+**/x64/**/*.tlog
+**/x64/**/*.lastbuildstate
+**/x64/**/*.idb
+**/x64/**/*.pdb
+**/x64/**/*.ipdb
+**/x64/**/*.iobj
