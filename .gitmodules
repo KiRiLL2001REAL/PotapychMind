@@ -1,0 +1,3 @@
+[submodule "PotapychMind/vendor/ImGui"]
+	path = PotapychMind/vendor/ImGui
+	url = https://github.com/ocornut/imgui.git

@@ -5,6 +5,7 @@
 # Logs
 *.log
 # anywhere/my.log, NOT my.logs | my.log.tmp
+x64/**/P7Logs/
 
 # Only relative to .gitignore file directory
 # /first_example/
