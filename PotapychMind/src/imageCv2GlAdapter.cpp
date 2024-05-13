@@ -68,3 +68,9 @@ void ImageCv2GlAdapter::imGuiDraw(ImVec2 size)
         ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(mTextureId)), size);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+const cv::Size& ImageCv2GlAdapter::size() const
+{
+    std::shared_lock<std::shared_mutex> lk(mut_);
+    return mMat.size();
+}
