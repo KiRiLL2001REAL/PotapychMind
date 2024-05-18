@@ -1,7 +1,6 @@
 #include "imageCv2GlAdapter.h"
 
 #include <exception>
-#include "utility.h"
 
 ImageCv2GlAdapter::ImageCv2GlAdapter():
     mMat(),
@@ -34,22 +33,43 @@ void ImageCv2GlAdapter::updateImage(cv::Mat& mat)
         //TODO logging
         return;
     }
-    // Если это одно и то же, ничего не меняем
-    if (Utility::isMatEqual(mMat, mat))
-        return;
 
-    // Иначе - обновляем матрицу и текстуру
-    mMat.release();
-    mMat = mat.clone();
+    // Обновляем матрицу и текстуру
+    bool needTextureRealloc =
+        (mMat.type() != mat.type())                        // Отличается тип
+        || (mMat.cols != mat.cols || mMat.rows != mat.rows // Отличается размерность
+            || mMat.dims != mat.dims)
+        || (mMat.data != mat.data);                        // Отличаются указатели на данные
+
+    mat.copyTo(mMat);
 
     glBindTexture(GL_TEXTURE_2D, mTextureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    //TODO всё это долго (около 1.25мс для 1280х720), рассмотреть PBO https://www.songho.ca/opengl/gl_pbo.html
     if (mMat.channels() == 1)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, mMat.cols, mMat.rows, 0, GL_RED, GL_UNSIGNED_BYTE, mMat.data);
+    {
+        if (needTextureRealloc)
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                GL_LUMINANCE, mMat.cols, mMat.rows,
+                0, GL_RED, GL_UNSIGNED_BYTE, mMat.data);
+        else
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                GL_LUMINANCE, mMat.cols, mMat.rows,
+                0, GL_RED, GL_UNSIGNED_BYTE, mMat.data);
+    }
     else
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mMat.cols, mMat.rows, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, mMat.data);
+    {
+        if (needTextureRealloc)
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                GL_RGB, mMat.cols, mMat.rows,
+                0, GL_BGR_EXT, GL_UNSIGNED_BYTE, mMat.data);
+        else
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                GL_RGB, mMat.cols, mMat.rows,
+                0, GL_BGR_EXT, GL_UNSIGNED_BYTE, mMat.data);
+    }
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 

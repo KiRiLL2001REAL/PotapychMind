@@ -8,7 +8,9 @@ void GUI::showCameraWindow(bool* p_open, ImageCv2GlAdapter& img)
 	static cv::Size cachedCameraFrameSize;
 	static ImVec2 cachedCameraFrameScaledSize;
 
-	if (!ImGui::Begin("Camera", p_open))
+	char buf[128];
+	sprintf_s(buf, "Camera %dx%d###CameraViewport", cachedCameraFrameSize.width, cachedCameraFrameSize.height);
+	if (!ImGui::Begin(buf, p_open))
 	{
 		ImGui::End();
 		return;
@@ -29,7 +31,6 @@ void GUI::showCameraWindow(bool* p_open, ImageCv2GlAdapter& img)
 			cachedCameraFrameSize.height * scale);
 	}
 
-	ImGui::Text("%dx%d", cachedCameraFrameSize.width, cachedCameraFrameSize.height);
 	img.imGuiDraw(cachedCameraFrameScaledSize);
 
 	ImGui::End();
