@@ -83,7 +83,7 @@ void ImageCv2GlAdapter::imGuiDraw(ImVec2 size)
     }
     glBindTexture(GL_TEXTURE_2D, mTextureId);
     if (0 == size.x and size.x == size.y)
-        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(mTextureId)), ImVec2(mMat.cols, mMat.rows));
+        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(mTextureId)), ImVec2((float)mMat.cols, (float)mMat.rows));
     else
         ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(mTextureId)), size);
     glBindTexture(GL_TEXTURE_2D, 0);

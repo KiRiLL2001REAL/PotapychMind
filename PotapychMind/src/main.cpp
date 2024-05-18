@@ -91,6 +91,7 @@
 #include <GL/GL.h>
 #include <tchar.h>
 
+#include "services/cameraService.h"
 #include "imageCv2GlAdapter.h"
 #include "gui/cameraWindow.h"
 
@@ -209,24 +210,8 @@ int main(int, char**)
 
     // ========== Инициализация камеры ==========
      
-    cv::VideoCapture cap;
-
-    int deviceId = 0;
-    int apiId = cv::CAP_ANY;
-
-    cap.open(deviceId, apiId);
-    if (!cap.isOpened())
-    {
-        pTrace->P7_CRITICAL(hModule, TM("Unable to open camera!"));
-        loggerDeInitialize();
-        return -1;
-    }
-
-    pTrace->P7_INFO(hModule, TM("Opened camera %d"), deviceId);
-    pTrace->P7_INFO(hModule, TM("Camera backend: %s"), Utility::to_wstring(cap.getBackendName()).c_str());
-    
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+    CameraService cameraService;
+    cameraService.launch(0, 1280, 720);
 
     cv::Mat frame;
     ImageCv2GlAdapter adaptFrame;
@@ -335,7 +320,8 @@ int main(int, char**)
 
         if (cameraWindowOpened)
         {
-            cap.read(frame);
+            long long timestamp;
+            cameraService.getFrame(frame, timestamp);
             adaptFrame.updateImage(frame);
 
             GUI::showCameraWindow(&cameraWindowOpened, adaptFrame);
@@ -381,6 +367,8 @@ int main(int, char**)
 
 
     // ========== Освобождение прочих ресурсов ==========
+
+    cameraService.stop();
 
     pTrace->P7_INFO(hModule, TM("Program finished"));
     loggerDeInitialize();
