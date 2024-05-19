@@ -10,9 +10,16 @@
 
 #include <opencv2/videoio.hpp>
 
+#include <P7_Client.h>
+#include <P7_Trace.h>
+
 class CameraService final
 {
 protected:
+	IP7_Client* pClient;
+	IP7_Trace* pTrace;
+	IP7_Trace::hModule hModule;
+
 	mutable std::shared_mutex mut_;
 	long long mCachedTimestamp;
 	cv::Mat mCachedFrame;

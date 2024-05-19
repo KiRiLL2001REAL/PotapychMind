@@ -1,7 +1,5 @@
 #include "imageCv2GlAdapter.h"
 
-#include <exception>
-
 ImageCv2GlAdapter::ImageCv2GlAdapter():
     mMat(),
     mTextureId(0)

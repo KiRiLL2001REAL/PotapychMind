@@ -1,4 +1,9 @@
 ﻿
+
+#ifndef GL_GLEXT_PROTOTYPES
+#define GL_GLEXT_PROTOTYPES
+#endif
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
@@ -188,9 +193,8 @@ int main(int, char**)
         loggerDeInitialize();
         return -1;
     }
-    pTrace->Share(TM("Trace channel 1"));
-    pTrace->Register_Thread(TM("Application"), 0);
     pTrace->Register_Module(TM("Main"), &hModule);
+    pTrace->Register_Thread(TM("Application"), 0);
 
 
 
@@ -207,11 +211,16 @@ int main(int, char**)
     pTrace->P7_INFO(hModule, TM("Current working directory is '%s'"), Utility::to_wstring(workingDirectory).c_str());
 
 
-
     // ========== Инициализация камеры ==========
      
     CameraService cameraService;
-    cameraService.launch(0, 1280, 720);
+    int devId = 0;
+    int reqWidth = 1280;
+    int reqHeight = 720;
+    if (!cameraService.launch(devId, reqWidth, reqHeight))
+    {
+        pTrace->P7_ERROR(hModule, TM("Can not start camera%d or resolution %dx%d is not supported."), devId, reqWidth, reqHeight);
+    }
 
     cv::Mat frame;
     ImageCv2GlAdapter adaptFrame;
@@ -265,6 +274,7 @@ int main(int, char**)
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_InitForOpenGL(hwnd);
     ImGui_ImplOpenGL3_Init();
+    printf("ImGui uses OpenGL of version: %s\n", glGetString(GL_VERSION));
 
     // Win32+GL needs specific hooks for viewport, as there are specific things needed to tie Win32 and GL api.
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
