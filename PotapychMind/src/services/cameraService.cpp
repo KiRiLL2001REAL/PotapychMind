@@ -15,13 +15,13 @@ void CameraService::storeFrame(cv::Mat& frame)
 
 void CameraService::runner()
 {
-	pTrace->Register_Thread(TM("Runner"), 0);
+	pTrace->Register_Thread(TM("CameraServiceRunner"), 0);
 	pTrace->P7_INFO(hModule, TM("Camera-frame-grabber thread started"));
 
 	cv::Mat frame;
 	while (mActiveFlag)
 	{
-		if (cap.read(frame))
+		if (mCap.read(frame))
 			storeFrame(frame);
 		cv::waitKey(1);
 		std::this_thread::yield();
@@ -41,7 +41,8 @@ CameraService::CameraService() :
 	mConnectedDeviceId(-1),
 	mActiveFlag(false),
 	mpRunnerThr(nullptr),
-	mCanDestroyThread(true)
+	mCanDestroyThread(true),
+	mThreadIsAlive(false)
 {
 	pClient = P7_Get_Shared(TM("AppClient"));
 	if (pClient == NULL)
@@ -51,7 +52,7 @@ CameraService::CameraService() :
 	}
 	else
 	{
-		pTrace = P7_Create_Trace(pClient, TM("Trace CameraService"));
+		pTrace = P7_Create_Trace(pClient, TM("Trace Service"));
 		if (NULL == pTrace)
 		{
 			printf("ERR : Can't create P7 trace channel in CameraService.\n");
@@ -60,14 +61,18 @@ CameraService::CameraService() :
 			throw std::runtime_error("Can not create P7 trace channel (CameraService)");
 		}
 		else
+		{
+			pTrace->Register_Thread(TM("CameraServiceInstance"), 0);
 			pTrace->Register_Module(TM("CameraService"), &hModule);
+		}
 	}
 	pTrace->P7_INFO(hModule, TM("CameraService instance is created"));
 }
 
 CameraService::~CameraService()
 {
-	stop();
+	if (mThreadIsAlive)
+		stop();
 	if (mpRunnerThr)
 	{
 		mpRunnerThr->join();
@@ -77,6 +82,7 @@ CameraService::~CameraService()
 	pTrace->P7_INFO(hModule, TM("CameraService instance is disposed"));
 	if (pTrace)
 	{
+		pTrace->Unregister_Thread(0);
 		pTrace->Release();
 		pTrace = NULL;
 	}
@@ -112,28 +118,26 @@ bool CameraService::launch(int deviceId, int reqWidth, int reqHeight)
 {
 	mutDeviceId_.lock();
 	pTrace->P7_INFO(hModule, TM("Trying to open device%d"), deviceId);
-	if (cap.open(deviceId, cv::CAP_ANY))
+	if (mCap.open(deviceId, cv::CAP_ANY))
 	{
-		pTrace->P7_INFO(hModule, TM("Device is opened"));
+		pTrace->P7_INFO(hModule, TM("Connected device%d"), deviceId);
 		pTrace->P7_INFO(hModule, TM("Check if device supports resolution %dx%d..."), reqWidth, reqHeight);
-		cap.set(cv::CAP_PROP_FRAME_WIDTH, reqWidth);
-		cap.set(cv::CAP_PROP_FRAME_HEIGHT, reqHeight);
-		if (cap.get(cv::CAP_PROP_FRAME_WIDTH) == reqWidth
-			&& cap.get(cv::CAP_PROP_FRAME_HEIGHT) == reqHeight)
+		mCap.set(cv::CAP_PROP_FRAME_WIDTH, reqWidth);
+		mCap.set(cv::CAP_PROP_FRAME_HEIGHT, reqHeight);
+		if (mCap.get(cv::CAP_PROP_FRAME_WIDTH) == reqWidth
+			&& mCap.get(cv::CAP_PROP_FRAME_HEIGHT) == reqHeight)
 		{
 			mConnectedDeviceId = deviceId;
 			pTrace->P7_INFO(hModule, TM("Success"));
-			pTrace->P7_INFO(hModule, TM("Connected device%d"), deviceId);
 		}
 		else
 		{
-			cap.release();
-			pTrace->P7_ERROR(hModule, TM("Failure"));
-			pTrace->P7_INFO(hModule, TM("Closed device%d"), deviceId);
+			mCap.release();
+			pTrace->P7_ERROR(hModule, TM("Failure. Closed device%d"), deviceId);
 		}
 	}
 	else
-		pTrace->P7_ERROR(hModule, TM("Device is busy, or unreachable"));
+		pTrace->P7_ERROR(hModule, TM("Device%d is busy, or unreachable"), deviceId);
 	mutDeviceId_.unlock();
 
 	if (getConnectedDeviceId() == -1)
@@ -142,6 +146,7 @@ bool CameraService::launch(int deviceId, int reqWidth, int reqHeight)
 	pTrace->P7_INFO(hModule, TM("Launching service"));
 	mActiveFlag = true;
 	mCanDestroyThread = false;
+	mThreadIsAlive = true;
 	mpRunnerThr = new std::thread(&CameraService::runner, this);
 	pTrace->P7_INFO(hModule, TM("Service launched"));
 
@@ -159,9 +164,10 @@ void CameraService::stop()
 		std::this_thread::yield();
 		std::this_thread::sleep_for(1ms);
 	}
-	if (cap.isOpened())
+	mThreadIsAlive = false;
+	if (mCap.isOpened())
 	{
-		cap.release();
+		mCap.release();
 		pTrace->P7_INFO(hModule, TM("Closed device%d"), mConnectedDeviceId);
 		mConnectedDeviceId = -1;
 	}

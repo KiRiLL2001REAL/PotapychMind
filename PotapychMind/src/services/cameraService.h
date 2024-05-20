@@ -25,12 +25,13 @@ protected:
 	cv::Mat mCachedFrame;
 
 	std::mutex mutDeviceId_;
-	cv::VideoCapture cap;
+	cv::VideoCapture mCap;
 	int mConnectedDeviceId;
 
 	std::atomic<bool> mActiveFlag;
 	std::thread* mpRunnerThr;
 	std::atomic<bool> mCanDestroyThread;
+	bool mThreadIsAlive;
 
 	void storeFrame(cv::Mat& frame);
 	void runner();

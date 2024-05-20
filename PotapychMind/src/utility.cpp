@@ -2,6 +2,8 @@
 
 #include <direct.h>
 #include <iostream>
+#include <windows.h>
+#include <exception>
 
 const std::string Utility::getWorkingDirectory()
 {
@@ -16,9 +18,28 @@ const std::string Utility::getWorkingDirectory()
 	return workingDirectory;
 }
 
+// https://stackoverflow.com/questions/14184709/is-this-code-safe-using-wstring-with-multibytetowidechar
 const std::wstring Utility::to_wstring(const std::string& str)
 {
-	return std::wstring(str.begin(), str.end());
+	std::wstring out = L"";
+
+	if (str.length() > 0)
+	{
+		// Calculate target buffer size (not including the zero terminator).
+		int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+			str.c_str(), str.size(), NULL, 0);
+		if (len == 0)
+		{
+			throw std::runtime_error("Invalid character sequence.");
+		}
+
+		out.resize(len);
+		// No error checking. We already know, that the conversion will succeed.
+		MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+			str.c_str(), str.size(), out.data(), out.size());
+	}
+
+	return out;
 }
 
 bool Utility::isMatEqual(cv::Mat& lhs, cv::Mat& rhs)
