@@ -14,7 +14,9 @@ void GUI::showCameraWindow(bool* p_open, ImageCv2GlAdapter& img)
         cachedCameraFrameSize.width, cachedCameraFrameSize.height);
     
     if (anyFrameReceived)
-        ImGui::SetNextWindowSize(cachedCameraFrameScaledSize, ImGuiCond_Once);
+        ImGui::SetNextWindowSize(
+            ImVec2(cachedCameraFrameSize.width, cachedCameraFrameSize.height),
+            ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(buffered_window_name, p_open))
     {
         ImGui::End();
