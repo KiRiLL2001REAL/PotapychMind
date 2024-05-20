@@ -87,63 +87,22 @@ void FaceScannerService::runner()
 }
 
 FaceScannerService::FaceScannerService():
-    pClient(NULL),
-    pTrace(NULL),
-    hModule(NULL),
+    BaseService("FaceScannerService"),
     mCachedDetectionResult(),
-    mFrameHandled(true),
-    mActiveFlag(false),
-    mpRunnerThr(nullptr),
-    mCanDestroyThread(true),
-    mThreadIsAlive(false)
+    mFrameHandled(true)
 {
-    pClient = P7_Get_Shared(TM("AppClient"));
-    if (pClient == NULL)
-    {
-        printf("ERR : Can't get P7 shared client instance.\n");
-        throw std::runtime_error("Can not get shared P7 client (FaceScannerService)");
-    }
-    else
-    {
-        pTrace = P7_Create_Trace(pClient, TM("Trace Service"));
-        if (NULL == pTrace)
-        {
-            printf("ERR : Can't create P7 trace channel in FaceScannerService.\n");
-            pClient->Release();
-            pClient = NULL;
-            throw std::runtime_error("Can not create P7 trace channel (FaceScannerService)");
-        }
-        else
-        {
-            pTrace->Register_Thread(TM("FaceScannerServiceInstance"), 0);
-            pTrace->Register_Module(TM("FaceScannerService"), &hModule);
-        }
-    }
-    pTrace->P7_INFO(hModule, TM("FaceScannerService instance is created"));
 }
 
 FaceScannerService::~FaceScannerService()
 {
-    if (mThreadIsAlive)
-        stop();
-    if (mpRunnerThr)
     {
-        mpRunnerThr->join();
-        delete mpRunnerThr;
+        std::unique_lock<std::shared_mutex> lk(mutFaces_);
+        mCachedFrame.release();
+        mCachedDetectionResult.clear();
     }
-    mFrame.release();
-    mCachedDetectionResult.clear();
-    pTrace->P7_INFO(hModule, TM("FaceScannerService instance is disposed"));
-    if (pTrace)
     {
-        pTrace->Unregister_Thread(0);
-        pTrace->Release();
-        pTrace = NULL;
-    }
-    if (pClient)
-    {
-        pClient->Release();
-        pClient = NULL;
+        std::lock_guard<std::mutex> lk(mutFrame_);
+        mFrame.release();
     }
 }
 
@@ -180,14 +139,5 @@ bool FaceScannerService::launch()
 
 void FaceScannerService::stop()
 {
-    pTrace->P7_INFO(hModule, TM("Stopping service"));
-    mActiveFlag = false;
-    while (!mCanDestroyThread)
-    {
-        using namespace std::chrono_literals;
-        std::this_thread::yield();
-        std::this_thread::sleep_for(1ms);
-    }
-    mThreadIsAlive = false;
-    pTrace->P7_INFO(hModule, TM("Service stopped"));
+    BaseService::stop();
 }

@@ -1,26 +1,13 @@
 #pragma once
 
-#include "../devices/deviceEnumerator.h"
 #include <opencv2/core.hpp>
-#include <shared_mutex>
-#include <thread>
-
-#include <vector>
-#include "../devices/deviceEnumerator.h"
-
 #include <opencv2/videoio.hpp>
 
-#include <P7_Client.h>
-#include <P7_Trace.h>
+#include "baseService.h"
 
-class CameraService final
+class CameraService: public BaseService
 {
 protected:
-	// Логгинг
-	IP7_Client* pClient;
-	IP7_Trace* pTrace;
-	IP7_Trace::hModule hModule;
-
 	// Данные
 	mutable std::shared_mutex mut_;
 	long long mCachedTimestamp;
@@ -30,14 +17,8 @@ protected:
 	cv::VideoCapture mCap;
 	int mConnectedDeviceId;
 
-	// Потоки
-	std::atomic<bool> mActiveFlag;
-	std::thread* mpRunnerThr;
-	std::atomic<bool> mCanDestroyThread;
-	bool mThreadIsAlive;
-
 	void storeFrame(cv::Mat& frame);
-	void runner();
+	virtual void runner();
 
 public:
 	CameraService();
@@ -52,7 +33,7 @@ public:
 	// в случае неудачного захвата камеры возвращает false, иначе - запускает поток захватчика кадров
 	bool launch(int deviceId, int width, int height);
 	// блокирующая функция, ожидает завершения потока
-	void stop();
+	virtual void stop();
 
 };
 

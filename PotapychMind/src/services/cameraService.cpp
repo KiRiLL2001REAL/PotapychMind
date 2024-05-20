@@ -1,9 +1,6 @@
 #include "cameraService.h"
 
-#include "../utility.h"
-#include <opencv2/highgui.hpp>
-
-#include <exception>
+#include <typeinfo>
 
 void CameraService::storeFrame(cv::Mat& frame)
 {
@@ -36,64 +33,16 @@ void CameraService::runner()
 }
 
 CameraService::CameraService() :
-	pClient(NULL),
-	pTrace(NULL),
-	hModule(NULL),
+	BaseService("CameraService"),
 	mCachedTimestamp(0),
 	mCachedFrame(),
-	mConnectedDeviceId(-1),
-	mActiveFlag(false),
-	mpRunnerThr(nullptr),
-	mCanDestroyThread(true),
-	mThreadIsAlive(false)
+	mConnectedDeviceId(-1)
 {
-	pClient = P7_Get_Shared(TM("AppClient"));
-	if (pClient == NULL)
-	{
-		printf("ERR : Can't get P7 shared client instance.\n");
-		throw std::runtime_error("Can not get shared P7 client (CameraService)");
-	}
-	else
-	{
-		pTrace = P7_Create_Trace(pClient, TM("Trace Service"));
-		if (NULL == pTrace)
-		{
-			printf("ERR : Can't create P7 trace channel in CameraService.\n");
-			pClient->Release();
-			pClient = NULL;
-			throw std::runtime_error("Can not create P7 trace channel (CameraService)");
-		}
-		else
-		{
-			pTrace->Register_Thread(TM("CameraServiceInstance"), 0);
-			pTrace->Register_Module(TM("CameraService"), &hModule);
-		}
-	}
-	pTrace->P7_INFO(hModule, TM("CameraService instance is created"));
 }
 
 CameraService::~CameraService()
 {
-	if (mThreadIsAlive)
-		stop();
-	if (mpRunnerThr)
-	{
-		mpRunnerThr->join();
-		delete mpRunnerThr;
-	}
 	mCachedFrame.release();
-	pTrace->P7_INFO(hModule, TM("CameraService instance is disposed"));
-	if (pTrace)
-	{
-		pTrace->Unregister_Thread(0);
-		pTrace->Release();
-		pTrace = NULL;
-	}
-	if (pClient)
-	{
-		pClient->Release();
-		pClient = NULL;
-	}
 }
 
 int CameraService::getConnectedDeviceId()
@@ -150,15 +99,7 @@ bool CameraService::launch(int deviceId, int reqWidth, int reqHeight)
 
 void CameraService::stop()
 {
-	pTrace->P7_INFO(hModule, TM("Stopping service"));
-	mActiveFlag = false;
-	while (!mCanDestroyThread)
-	{
-		using namespace std::chrono_literals;
-		std::this_thread::yield();
-		std::this_thread::sleep_for(1ms);
-	}
-	mThreadIsAlive = false;
+	BaseService::stop();
 	if (mCap.isOpened())
 	{
 		std::lock_guard<std::mutex> lk(mutDeviceId_);
@@ -166,6 +107,4 @@ void CameraService::stop()
 		pTrace->P7_INFO(hModule, TM("Closed device%d"), mConnectedDeviceId);
 		mConnectedDeviceId = -1;
 	}
-
-	pTrace->P7_INFO(hModule, TM("Service stopped"));
 }
