@@ -13,7 +13,7 @@ How to compile:
 - Rename it to **p7d.lib**
 - Launch BUILD and INSTALL solutions in Release mode, it produces file **p7.lib**
 
-How to use:
+How to link:
 - Copy `lib` catalog to `vendor/libp7`
 - Open your project, go to 'Project'->'Properties'->'Configuration Properties'->'VC++ Directories'
 -- In 'Include Directories' add `$(ProjectDir)vendor\libp7\Headers;`
@@ -40,7 +40,7 @@ cd PotapychMind/vendor/ImGui
 git checkout tags/v1.90.6-docking
 ```
 
-How to use:
+How to link:
 - Open your project, go to 'Project'->'Properties'->'Configuration Properties'->'VC++ Directories'
 -- In 'Include Directories' add `$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;`
 - Go to 'Project'->'Properties'->'Configuration Properties'->'Linker'
@@ -51,3 +51,26 @@ How to use:
 
 [//]: #links
 [ImGui_github]: https://github.com/ocornut/imgui.git
+
+## serial
+
+-  GNU Lesser General Public License
+
+Library files were taken from [this][cserial_files] site.
+An article on how to use the library is available at [this][cserial_how-to-use] link.
+
+How to link:
+- Open your project, go to 'Project'->'Properties'->'Configuration Properties'->'VC++ Directories'
+-- In 'Include Directories' add `$(ProjectDir)vendor\serial`
+
+To avoid any errors when compiling the program, use these lines below to include the `serial.h` library in your code:
+```c++
+#define STRICT
+#include <tchar.h>
+#include <windows.h>
+#include "serial.h"
+```
+
+[//]: #links
+[cserial_how-to-use]: https://www.codeproject.com/Articles/992/Serial-library-for-C
+[cserial_files]: https://www.codeproject.com/script/Articles/ViewDownloads.aspx?aid=992

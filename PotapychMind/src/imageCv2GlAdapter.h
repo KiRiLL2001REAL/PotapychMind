@@ -28,6 +28,6 @@ public:
     void updateImage(cv::Mat& mat);
     void imGuiDraw(ImVec2 size = {0, 0});
 
-    const cv::Size& size() const;
+    cv::Size size() const;
 };
 
