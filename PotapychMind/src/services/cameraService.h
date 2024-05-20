@@ -16,10 +16,12 @@
 class CameraService final
 {
 protected:
+	// Логгинг
 	IP7_Client* pClient;
 	IP7_Trace* pTrace;
 	IP7_Trace::hModule hModule;
 
+	// Данные
 	mutable std::shared_mutex mut_;
 	long long mCachedTimestamp;
 	cv::Mat mCachedFrame;
@@ -28,6 +30,7 @@ protected:
 	cv::VideoCapture mCap;
 	int mConnectedDeviceId;
 
+	// Потоки
 	std::atomic<bool> mActiveFlag;
 	std::thread* mpRunnerThr;
 	std::atomic<bool> mCanDestroyThread;
@@ -40,9 +43,6 @@ public:
 	CameraService();
 	// блокирующая функция, смотри ::stop()
 	~CameraService();
-
-	// получить список всех камер в системе
-	std::vector<devices::Device> getCameraList();
 
 	// возвращает id подключённой камеры (-1 если не подключились)
 	int getConnectedDeviceId();

@@ -45,12 +45,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\libs\opencv490\build\include;$(ProjectDir)vendor\libp7\Headers;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\libs\opencv490\build\include;$(ProjectDir)vendor\libp7\Headers;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(ProjectDir)vendor\serial;D:\kirill\Repository\C++\PotapychMind\PotapychMind\vendor\libfacedetection\include\facedetection;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\libs\opencv490\build\include;$(ProjectDir)vendor\libp7\Headers;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\libs\opencv490\build\include;$(ProjectDir)vendor\libp7\Headers;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(ProjectDir)vendor\serial;D:\kirill\Repository\C++\PotapychMind\PotapychMind\vendor\libfacedetection\include\facedetection;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -66,8 +66,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\libs\opencv490\build\x64\vc16\lib;$(ProjectDir)vendor\libp7\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world490d.lib;ws2_32.lib;p7d.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\libs\opencv490\build\x64\vc16\lib;$(ProjectDir)vendor\libp7\lib;$(ProjectDir)vendor\libfacedetection\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_world490d.lib;ws2_32.lib;p7d.lib;opengl32.lib;facedetectiond.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -86,16 +86,18 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\libs\opencv490\build\x64\vc16\lib;$(ProjectDir)vendor\libp7\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world490.lib;ws2_32.lib;p7.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\libs\opencv490\build\x64\vc16\lib;$(ProjectDir)vendor\libp7\lib;$(ProjectDir)vendor\libfacedetection\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_world490.lib;ws2_32.lib;p7.lib;opengl32.lib;facedetection.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\devices\serial\serialPortUtility.cpp" />
     <ClCompile Include="src\gui\cameraWindow.cpp" />
     <ClCompile Include="src\imageCv2GlAdapter.cpp" />
     <ClCompile Include="src\devices\deviceEnumerator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\services\cameraService.cpp" />
+    <ClCompile Include="src\services\faceScannerService.cpp" />
     <ClCompile Include="src\utility.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_win32.cpp" />
@@ -104,12 +106,18 @@
     <ClCompile Include="vendor\ImGui\imgui_draw.cpp" />
     <ClCompile Include="vendor\ImGui\imgui_tables.cpp" />
     <ClCompile Include="vendor\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="vendor\libfacedetection\include\facedetection\facedetectcnn-data.cpp" />
+    <ClCompile Include="vendor\libfacedetection\include\facedetection\facedetectcnn-model.cpp" />
+    <ClCompile Include="vendor\libfacedetection\include\facedetection\facedetectcnn.cpp" />
+    <ClCompile Include="vendor\serial\serial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\devices\serial\serialPortUtility.h" />
     <ClInclude Include="src\gui\cameraWindow.h" />
     <ClInclude Include="src\imageCv2GlAdapter.h" />
     <ClInclude Include="src\devices\deviceEnumerator.h" />
     <ClInclude Include="src\services\cameraService.h" />
+    <ClInclude Include="src\services\faceScannerService.h" />
     <ClInclude Include="src\utility.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3_loader.h" />
@@ -120,6 +128,8 @@
     <ClInclude Include="vendor\ImGui\imstb_rectpack.h" />
     <ClInclude Include="vendor\ImGui\imstb_textedit.h" />
     <ClInclude Include="vendor\ImGui\imstb_truetype.h" />
+    <ClInclude Include="vendor\libfacedetection\include\facedetection\facedetectcnn.h" />
+    <ClInclude Include="vendor\libfacedetection\include\facedetection\facedetection_export.h" />
     <ClInclude Include="vendor\libp7\Headers\GTypes.h" />
     <ClInclude Include="vendor\libp7\Headers\P7_Client.h" />
     <ClInclude Include="vendor\libp7\Headers\P7_Cproxy.h" />
@@ -127,6 +137,7 @@
     <ClInclude Include="vendor\libp7\Headers\P7_Telemetry.h" />
     <ClInclude Include="vendor\libp7\Headers\P7_Trace.h" />
     <ClInclude Include="vendor\libp7\Headers\P7_Version.h" />
+    <ClInclude Include="vendor\serial\serial.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

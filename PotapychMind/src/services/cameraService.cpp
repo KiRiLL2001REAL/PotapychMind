@@ -23,8 +23,11 @@ void CameraService::runner()
 	{
 		if (mCap.read(frame))
 			storeFrame(frame);
-		cv::waitKey(1);
-		std::this_thread::yield();
+		{
+			using namespace std::chrono_literals;
+			std::this_thread::yield();
+			std::this_thread::sleep_for(1ms);
+		}
 	}
 	mCanDestroyThread = true;
 
@@ -93,14 +96,6 @@ CameraService::~CameraService()
 	}
 }
 
-std::vector<devices::Device> CameraService::getCameraList()
-{
-	auto videoDevices = devices::DeviceEnumerator::getVideoDevicesMap();
-	std::vector<devices::Device> result;
-	Utility::mapToVec(videoDevices, result);
-	return result;
-}
-
 int CameraService::getConnectedDeviceId()
 {
 	std::lock_guard<std::mutex> lk(mutDeviceId_);
@@ -156,7 +151,6 @@ bool CameraService::launch(int deviceId, int reqWidth, int reqHeight)
 void CameraService::stop()
 {
 	pTrace->P7_INFO(hModule, TM("Stopping service"));
-	std::lock_guard<std::mutex> lk(mutDeviceId_);
 	mActiveFlag = false;
 	while (!mCanDestroyThread)
 	{
@@ -167,6 +161,7 @@ void CameraService::stop()
 	mThreadIsAlive = false;
 	if (mCap.isOpened())
 	{
+		std::lock_guard<std::mutex> lk(mutDeviceId_);
 		mCap.release();
 		pTrace->P7_INFO(hModule, TM("Closed device%d"), mConnectedDeviceId);
 		mConnectedDeviceId = -1;

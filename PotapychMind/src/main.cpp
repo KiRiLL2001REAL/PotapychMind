@@ -97,6 +97,7 @@
 #include <tchar.h>
 
 #include "services/cameraService.h"
+#include "services/faceScannerService.h"
 #include "imageCv2GlAdapter.h"
 #include "gui/cameraWindow.h"
 
@@ -227,6 +228,17 @@ int main(int, char**)
 
 
 
+    // ========== Инициализация сканера лиц ==========
+
+    FaceScannerService faceScannerService;
+    if (!faceScannerService.launch())
+    {
+        pTrace->P7_ERROR(hModule, TM("Can not start faceScanner."));
+    }
+
+    std::vector<Face> detectionResult = {};
+
+
     // ========== Инициализация графики ==========
 
     // Create application window
@@ -293,7 +305,7 @@ int main(int, char**)
     // Our state
     bool cameraWindowOpened = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+    int cameraWindowVisualization = 0;
 
 
     // ========== Главный цикл GUI потока ==========
@@ -325,13 +337,61 @@ int main(int, char**)
 
         // Тут можем рисовать что-либо своё
 
-        if (ImGui::Button("Show camera"))
-            cameraWindowOpened = true;
+        // Виджет управления окном камеры
+        if (ImGui::Checkbox("Show camera", &cameraWindowOpened))
+        {
+        }
+        ImGui::BeginDisabled(!cameraWindowOpened);
+        if (ImGui::CollapsingHeader("Algorythm settings"))
+        {
+            ImGui::RadioButton("Detected faces over camera preview", &cameraWindowVisualization, 0);
+            ImGui::RadioButton("Detected faces over provided image", &cameraWindowVisualization, 1);
+            ImGui::RadioButton("Raw camera preview", &cameraWindowVisualization, 2);
+        }
+        ImGui::EndDisabled();
 
         if (cameraWindowOpened)
         {
+            // лямбда отрисовки прямоугольников на лицах
+            auto drawRects = [detectionResult, frame]()
+            {
+                for (const auto& detRes : detectionResult)
+                {
+                    cv::Scalar color;
+                    switch (detRes.peopleClass)
+                    {
+                        // blue
+                    case PeopleClass::Familiar: color = cv::Scalar(255, 0, 0); break;
+                        // green
+                    case PeopleClass::Interviewee: color = cv::Scalar(0, 255, 0); break;
+                        // red
+                    case PeopleClass::Stranger:
+                    default: color = cv::Scalar(0, 0, 255);
+                    }
+                    cv::rectangle(frame, detRes.roi, color, 2);
+                }
+            };
+
             long long timestamp;
             cameraService.getFrame(frame, timestamp);
+
+            switch (cameraWindowVisualization)
+            {
+            case 0:
+                faceScannerService.pushFrame(frame);
+                faceScannerService.getDetectionResult(detectionResult);
+                drawRects();
+                break;
+            case 1:
+                faceScannerService.pushFrame(frame);
+                faceScannerService.getDetectionResult(frame, detectionResult);
+                drawRects();
+                break;
+            case 2:
+                adaptFrame.updateImage(frame);
+                break;
+            }
+
             adaptFrame.updateImage(frame);
 
             GUI::showCameraWindow(&cameraWindowOpened, adaptFrame);
@@ -378,6 +438,7 @@ int main(int, char**)
 
     // ========== Освобождение прочих ресурсов ==========
 
+    faceScannerService.stop();
     cameraService.stop();
 
     pTrace->P7_INFO(hModule, TM("Program finished"));
