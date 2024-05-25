@@ -80,6 +80,10 @@ void FaceScannerService::runner()
 
         spin();
     }
+
+    if (pBuffer)
+        free(pBuffer);
+
     mCanDestroyThread = true;
 
     pTrace->P7_INFO(hModule, TM("Face-scanner thread finished"));

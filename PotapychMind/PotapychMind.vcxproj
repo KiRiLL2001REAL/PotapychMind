@@ -92,7 +92,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\services\baseService.cpp" />
-    <ClCompile Include="src\devices\serial\serialPortUtility.cpp" />
+    <ClCompile Include="src\devices\serial\serialPortWrapper.cpp" />
     <ClCompile Include="src\gui\cameraWindow.cpp" />
     <ClCompile Include="src\imageCv2GlAdapter.cpp" />
     <ClCompile Include="src\devices\deviceEnumerator.cpp" />
@@ -114,7 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\services\baseService.h" />
-    <ClInclude Include="src\devices\serial\serialPortUtility.h" />
+    <ClInclude Include="src\devices\serial\serialPortWrapper.h" />
     <ClInclude Include="src\gui\cameraWindow.h" />
     <ClInclude Include="src\imageCv2GlAdapter.h" />
     <ClInclude Include="src\devices\deviceEnumerator.h" />

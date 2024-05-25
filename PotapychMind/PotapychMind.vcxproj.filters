@@ -54,7 +54,7 @@
     <ClCompile Include="src\services\cameraService.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\devices\serial\serialPortUtility.cpp">
+    <ClCompile Include="src\devices\serial\serialPortWrapper.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="vendor\serial\serial.cpp">
@@ -140,7 +140,7 @@
     <ClInclude Include="src\services\cameraService.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\devices\serial\serialPortUtility.h">
+    <ClInclude Include="src\devices\serial\serialPortWrapper.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="vendor\serial\serial.h">

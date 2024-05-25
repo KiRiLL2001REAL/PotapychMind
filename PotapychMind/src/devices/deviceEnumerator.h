@@ -17,7 +17,6 @@ namespace devices {
 		std::string deviceName;
 	};
 
-
 	class DeviceEnumerator final
 	{
 	private:
@@ -26,7 +25,6 @@ namespace devices {
 	public:
 		static std::map<int, Device> getDevicesMap(const GUID deviceClass);
 		static std::map<int, Device> getVideoDevicesMap();
-		static std::map<int, Device> getAudioDevicesMap();
 	};
 
 }

@@ -109,8 +109,3 @@ std::map<int, devices::Device> devices::DeviceEnumerator::getVideoDevicesMap()
 {
 	return getDevicesMap(CLSID_VideoInputDeviceCategory);
 }
-
-std::map<int, devices::Device> devices::DeviceEnumerator::getAudioDevicesMap()
-{
-	return getDevicesMap(CLSID_AudioInputDeviceCategory);
-}

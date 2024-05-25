@@ -8,7 +8,7 @@
 #include <P7_Client.h>
 #include <P7_Trace.h>
 
-class BaseService
+class BaseService abstract
 {
 private:
     std::wstring m_name;
