@@ -5,26 +5,24 @@
 
 #include <Windows.h>
 #pragma comment(lib, "strmiids")
-#include <map>
+#include <vector>
 #include <string>
 
 namespace devices {
 
-	struct Device final
-	{
-		int id;
-		std::string devicePath;
-		std::string deviceName;
-	};
+    struct Device final
+    {
+        int id;
+        std::wstring devicePath;
+        std::wstring deviceName;
+    };
 
-	class DeviceEnumerator final
-	{
-	private:
-		static std::string ConvertBSTRToMBS(BSTR bstr);
-		static std::string ConvertWCSToMBS(const wchar_t* pstr, long wslen);
-	public:
-		static std::map<int, Device> getDevicesMap(const GUID deviceClass);
-		static std::map<int, Device> getVideoDevicesMap();
-	};
+    class DeviceEnumerator final
+    {
+    public:
+        static std::vector<Device> getDevices(const GUID deviceClass);
+        static std::vector<Device> getVideoDevices();
+        static std::vector<Device> getComDevices();
+    };
 
 }

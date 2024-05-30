@@ -1,9 +1,4 @@
 ﻿
-
-#ifndef GL_GLEXT_PROTOTYPES
-#define GL_GLEXT_PROTOTYPES
-#endif
-
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
@@ -98,6 +93,7 @@
 
 #include "services/cameraService.h"
 #include "services/faceScannerService.h"
+#include "services/robotHandlerService.h"
 #include "imageCv2GlAdapter.h"
 #include "gui/cameraWindow.h"
 
@@ -155,6 +151,11 @@ static void Hook_Renderer_SwapBuffers(ImGuiViewport* viewport, void*)
 // Main code
 int main(int, char**)
 {
+    // Добавляем в консоль поддержку символов кириллицы (иначе вывод может внезапно повиснуть)
+    std::wcout.imbue(std::locale("rus_rus.866"));
+
+
+
     // ========== Инициализация логгера ==========
 
     IP7_Client* pClient = NULL;
@@ -237,6 +238,36 @@ int main(int, char**)
     }
 
     std::vector<Face> detectionResult = {};
+
+
+
+    // ========== Инициализация модуля управления роботом ==========
+    RobotHandlerService robotService;
+    if (!robotService.launch(L"\\\\.\\COM13"))
+    {
+        pTrace->P7_ERROR(hModule, TM("Can not start robotHandler."));
+    }
+
+
+
+    // ========== TMP ==========
+    auto devCom = devices::DeviceEnumerator::getComDevices();
+    std::cout << "COM ports:\n";
+    for (const auto& dev : devCom)
+    {
+        std::cout << "\tId: " << dev.id;
+        std::wcout << L"\tName: " << dev.deviceName;
+        std::wcout << L"\tPath: " << dev.devicePath << std::endl;
+    }
+    auto devCam = devices::DeviceEnumerator::getVideoDevices();
+    std::cout << "Cameras:\n";
+    for (const auto& dev : devCam)
+    {
+        std::cout << "\tId: " << dev.id;
+        std::wcout << L"\tName: " << dev.deviceName;
+        std::wcout << L"\tPath: " << dev.devicePath << std::endl;
+    }
+
 
 
     // ========== Инициализация графики ==========

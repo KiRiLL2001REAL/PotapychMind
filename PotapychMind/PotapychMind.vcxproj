@@ -99,6 +99,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\services\cameraService.cpp" />
     <ClCompile Include="src\services\faceScannerService.cpp" />
+    <ClCompile Include="src\services\robotHandlerService.cpp" />
     <ClCompile Include="src\utility.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_win32.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="src\devices\deviceEnumerator.h" />
     <ClInclude Include="src\services\cameraService.h" />
     <ClInclude Include="src\services\faceScannerService.h" />
+    <ClInclude Include="src\services\robotHandlerService.h" />
     <ClInclude Include="src\utility.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3_loader.h" />

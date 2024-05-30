@@ -1,7 +1,5 @@
 #include "cameraService.h"
 
-#include <typeinfo>
-
 void CameraService::storeFrame(cv::Mat& frame)
 {
 	std::unique_lock<std::shared_mutex> lk(mut_);
