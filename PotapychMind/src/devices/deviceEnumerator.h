@@ -10,14 +10,14 @@
 
 namespace devices {
 
-    struct Device final
+    struct Device
     {
         int id;
         std::wstring devicePath;
         std::wstring deviceName;
     };
 
-    class DeviceEnumerator final
+    class DeviceEnumerator
     {
     public:
         static std::vector<Device> getDevices(const GUID deviceClass);

@@ -9,7 +9,7 @@
 
 // Класс для отображения cv::Mat в контексте opengl
 // Принимает только изображения типа CV_8UC1 и CV_8UC3.
-class ImageCv2GlAdapter final
+class ImageCv2GlAdapter
 {
 protected:
     mutable std::shared_mutex mut_;

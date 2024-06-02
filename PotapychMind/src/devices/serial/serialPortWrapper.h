@@ -16,7 +16,7 @@ protected:
     std::mutex servoMutex;
 
 public:
-    bool connect(const std::wstring comPortName = L"COM13");
+    bool connect(const std::wstring comPortName = L"\\\\.\\COM13");
     void disconnect();
     void write(const void* pData, size_t iLen);
     const std::wstring& getConnectedComName();

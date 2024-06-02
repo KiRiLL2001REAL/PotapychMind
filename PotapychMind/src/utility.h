@@ -3,7 +3,7 @@
 #include <string>
 #include <opencv2/core.hpp>
 
-class Utility final
+class Utility
 {
 public:
 	static const std::string getWorkingDirectory();
