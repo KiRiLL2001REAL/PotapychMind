@@ -14,6 +14,12 @@
 #include <P7_Client.h>
 #include <P7_Trace.h>
 
+/*TODO
+Поиск локального файла конфигурации.
+Если он не найден, клонируем дефолтный.
+Если какие-либо значения в локальном конфиге не найдены, записываем их из дефолтного.
+*/
+
 //    std::cout << "INFO: Video devices list:\n";
 //    pTrace->P7_INFO(hModule, TM("Video devices list:"));
 //    auto videoDevices = devices::DeviceEnumerator::getVideoDevicesMap();
@@ -96,6 +102,7 @@
 #include "services/robotHandlerService.h"
 #include "imageCv2GlAdapter.h"
 #include "gui/cameraWindow.h"
+#include "ini/defaultConfig.h"
 
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
@@ -213,6 +220,22 @@ int main(int, char**)
     pTrace->P7_INFO(hModule, TM("Current working directory is '%s'"), Utility::to_wstring(workingDirectory).c_str());
 
 
+
+    // ========== Загрузка конфигурации ==========
+
+    const auto cfgFile = Utility::to_wstring(workingDirectory) + L"\\resources\\defaultCfg.ini";
+    auto& config = *DefaultConfig::getInstance();
+    if (!config.initialize(cfgFile))
+    {
+        std::cerr << "ERR : Unable to find default configuration file\n";
+        pTrace->P7_CRITICAL(hModule, TM("Unable to find default configuration file '%s'"), cfgFile.c_str());
+        loggerDeInitialize();
+        return -1;
+    }
+    pTrace->P7_INFO(hModule, TM("Found and loaded default config from '%s'"), cfgFile.c_str());
+
+
+
     // ========== Инициализация камеры ==========
      
     CameraService cameraService;
@@ -243,7 +266,7 @@ int main(int, char**)
 
     // ========== Инициализация модуля управления роботом ==========
     RobotHandlerService robotService;
-    if (!robotService.launch(L"\\\\.\\COM13"))
+    if (!robotService.launch(L"\\\\.\\COM5"))
     {
         pTrace->P7_ERROR(hModule, TM("Can not start robotHandler."));
     }
