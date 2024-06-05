@@ -1,15 +1,15 @@
 #pragma once
 
-#include "baseService.h"
+#include "../../internal/loggable/loggable.h"
 
-#include "../devices/serial/serialPortWrapper.h"
+#include "../serial/serialPortWrapper.h"
 #include <mutex>
 #include <queue>
 #include <string>
 #include <vector>
-#include "servoService.h"
+#include "../../services/servoService.h"
 
-class RobotHandler : public BaseService
+class RobotHandler : public Loggable
 {
 protected:
     SerialPortWrapper mSerial;
@@ -17,8 +17,6 @@ protected:
     std::vector<ServoService*> mServo;
 
     bool checkServos() const;
-
-    virtual void runner();
 
 public:
     RobotHandler();

@@ -97,11 +97,12 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\internal\loggable\loggable.cpp" />
     <ClCompile Include="src\data\servoState.cpp" />
     <ClCompile Include="src\data\defaultConfig.cpp" />
     <ClCompile Include="src\internal\ini\iniWriter.cpp" />
     <ClCompile Include="src\internal\ini\iniReader.cpp" />
-    <ClCompile Include="src\services\baseService.cpp" />
+    <ClCompile Include="src\services\base\baseService.cpp" />
     <ClCompile Include="src\devices\serial\serialPortWrapper.cpp" />
     <ClCompile Include="src\gui\cameraWindow.cpp" />
     <ClCompile Include="src\imageCv2GlAdapter.cpp" />
@@ -109,7 +110,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\services\cameraService.cpp" />
     <ClCompile Include="src\services\faceScannerService.cpp" />
-    <ClCompile Include="src\services\robotHandlerService.cpp" />
+    <ClCompile Include="src\devices\robot\robotHandler.cpp" />
     <ClCompile Include="src\services\servoService.cpp" />
     <ClCompile Include="src\utility.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_opengl3.cpp" />
@@ -125,19 +126,20 @@
     <ClCompile Include="vendor\serial\serial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\internal\loggable\loggable.h" />
     <ClInclude Include="src\data\servoState.h" />
     <ClInclude Include="src\data\defaultConfig.h" />
     <ClInclude Include="src\internal\ini\iniWriter.h" />
     <ClInclude Include="src\internal\ini\iniDefaults.h" />
     <ClInclude Include="src\internal\ini\iniReader.h" />
-    <ClInclude Include="src\services\baseService.h" />
+    <ClInclude Include="src\services\base\baseService.h" />
     <ClInclude Include="src\devices\serial\serialPortWrapper.h" />
     <ClInclude Include="src\gui\cameraWindow.h" />
     <ClInclude Include="src\imageCv2GlAdapter.h" />
     <ClInclude Include="src\devices\deviceEnumerator.h" />
     <ClInclude Include="src\services\cameraService.h" />
     <ClInclude Include="src\services\faceScannerService.h" />
-    <ClInclude Include="src\services\robotHandlerService.h" />
+    <ClInclude Include="src\devices\robot\robotHandler.h" />
     <ClInclude Include="src\services\servoService.h" />
     <ClInclude Include="src\utility.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3.h" />

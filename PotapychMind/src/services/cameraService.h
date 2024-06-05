@@ -3,7 +3,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 
-#include "baseService.h"
+#include "base/baseService.h"
 
 class CameraService: public BaseService
 {

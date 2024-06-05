@@ -1,26 +1,13 @@
 #pragma once
 
+#include "../../internal/loggable/loggable.h"
 #include <shared_mutex>
 #include <thread>
 
-#include <string>
-
-#include <P7_Client.h>
-#include <P7_Trace.h>
-
 //TODO разделить на BaseService и Loggable
-class BaseService abstract
+class BaseService abstract : public Loggable
 {
-private:
-    std::wstring m_name;
-
 protected:
-    // Логгинг
-    IP7_Client* pClient;
-    IP7_Trace* pTrace;
-    IP7_Trace::hModule hModule;
-
-    // Потоки
     std::atomic<bool> mActiveFlag;
     std::thread* mpRunnerThr;
     std::atomic<bool> mCanDestroyThread;

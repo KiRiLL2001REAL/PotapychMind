@@ -99,7 +99,7 @@
 
 #include "services/cameraService.h"
 #include "services/faceScannerService.h"
-#include "services/robotHandlerService.h"
+#include "devices/robot/robotHandler.h"
 #include "imageCv2GlAdapter.h"
 #include "gui/cameraWindow.h"
 #include "data/defaultConfig.h"

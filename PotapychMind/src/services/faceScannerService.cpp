@@ -23,7 +23,7 @@ void FaceScannerService::storeDetectionResult(cv::Mat& src, std::vector<Face>& f
 
 void FaceScannerService::runner()
 {
-    pTrace->Register_Thread(TM("FaceScannerService"), 0);
+    pTrace->Register_Thread(TM("FaceScannerServiceRunner"), 0);
     pTrace->P7_INFO(hModule, TM("Face-scanner thread started"));
 
     auto spin = []()

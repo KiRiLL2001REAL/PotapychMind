@@ -1,6 +1,6 @@
-#include "robotHandlerService.h"
+#include "robotHandler.h"
 
-#include "../data/defaultConfig.h"
+#include "../../data/defaultConfig.h"
 
 bool RobotHandler::checkServos() const
 {
@@ -10,14 +10,28 @@ bool RobotHandler::checkServos() const
     return !empty;
 }
 
-void RobotHandler::runner()
-{
-}
-
 RobotHandler::RobotHandler():
-    BaseService("RobotHandlerService"),
+    Loggable("RobotHandler"),
     mServo()
 {
+    static const std::string name = "RobotHandler";
+    pTrace = P7_Create_Trace(pClient, TM("Trace Handler"));
+    if (NULL == pTrace)
+    {
+        printf("ERR : Can't create P7 trace channel in %s.\n", name.c_str());
+        pClient->Release();
+        pClient = NULL;
+        char msg[128];
+        sprintf_s(msg, "Can not create P7 trace channel (%s)", name.c_str());
+        throw std::runtime_error(msg);
+    }
+    else
+    {
+        auto decorated_w_name = _mName + L"Instance";
+        pTrace->Register_Thread(decorated_w_name.c_str(), 0);
+        pTrace->Register_Module(_mName.c_str(), &hModule);
+    }
+    pTrace->P7_INFO(hModule, TM("%s instance is created"), _mName.c_str());
 }
 
 RobotHandler::~RobotHandler()
@@ -31,7 +45,7 @@ RobotHandler::~RobotHandler()
             count++;
         }
     }
-    pTrace->P7_INFO(hModule, TM("Disposed %d services of servos"), count);
+    pTrace->P7_INFO(hModule, TM("Disposed %d servo services"), count);
 
     if (mSerial.getConnectedComName() != L"")
         mSerial.disconnect();
