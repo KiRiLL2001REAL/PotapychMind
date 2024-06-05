@@ -1,99 +1,340 @@
 #include "robotHandlerService.h"
 
-void RobotHandlerService::popQ(std::pair<int, int>& dst)
+#include "../data/defaultConfig.h"
+
+bool RobotHandler::checkServos() const
 {
-	std::lock_guard<std::mutex> lk(mutCmd_);
-	dst = mCmdQ.front();
-	mCmdQ.pop();
+    bool empty = mServo.empty();
+    if (empty)
+        pTrace->P7_WARNING(hModule, TM("Servos aren't initialized yet"));
+    return !empty;
 }
 
-void RobotHandlerService::runner()
-{
-	pTrace->Register_Thread(TM("RobotHandlerServiceRunner"), 0);
-	pTrace->P7_INFO(hModule, TM("Robot-cmd-executor thread started"));
-	
-	int cmdProcessedInLoop = 0;
-	std::pair<int, int> cmd;
-	while (mActiveFlag)
-	{
-		cmdProcessedInLoop = 0;
-		while (!mCmdQ.empty())
-		{
-			popQ(cmd);
-			//TODO cmd handling
-			cmdProcessedInLoop++;
-		}
-
-		if (cmdProcessedInLoop)
-		{
-			pTrace->P7_INFO(hModule, TM("Processed %d commands"), cmdProcessedInLoop);
-		}
-
-		using namespace std::chrono_literals;
-		std::this_thread::yield();
-		std::this_thread::sleep_for(1ms);
-	}
-	mCanDestroyThread = true;
-
-	pTrace->P7_INFO(hModule, TM("Robot-cmd-executor thread finished"));
-	pTrace->Unregister_Thread(0);
-}
-
-RobotHandlerService::RobotHandlerService():
-	BaseService("RobotHandlerService"),
-	mCmdQ()
+void RobotHandler::runner()
 {
 }
 
-RobotHandlerService::~RobotHandlerService()
+RobotHandler::RobotHandler():
+    BaseService("RobotHandlerService"),
+    mServo()
 {
 }
 
-const std::wstring& RobotHandlerService::getConnectedComPortName()
+RobotHandler::~RobotHandler()
 {
-	std::lock_guard<std::mutex> lk(mutSerial_);
-	return mSerial.getConnectedComName();
+    int count = 0;
+    for (int i = 0; i < mServo.size(); i++)
+    {
+        if (mServo[i])
+        {
+            delete mServo[i];
+            count++;
+        }
+    }
+    pTrace->P7_INFO(hModule, TM("Disposed %d services of servos"), count);
+
+    if (mSerial.getConnectedComName() != L"")
+        mSerial.disconnect();
 }
 
-void RobotHandlerService::putCmd(const std::pair<int, int>& cmd)
+const std::wstring& RobotHandler::getConnectedComPortName()
 {
-	std::lock_guard<std::mutex> lk(mutCmd_);
-	mCmdQ.push(cmd);
+    return mSerial.getConnectedComName();
 }
 
-bool RobotHandlerService::launch(const std::wstring& comName)
+void RobotHandler::headToCenter()
 {
-	{
-		std::lock_guard<std::mutex> lk(mutSerial_);
-		const auto comNameChars = comName.c_str();
-		pTrace->P7_INFO(hModule, TM("Trying to open port '%s'"), comNameChars);
-		if (mSerial.connect(comName))
-			pTrace->P7_INFO(hModule, TM("Connected port '%s'"), comNameChars);
-		else
-			pTrace->P7_ERROR(hModule, TM("Port '%s' is busy, or unreachable"), comNameChars);
-	}
-	if (mSerial.getConnectedComName() == L"")
-		return false;
+    static std::vector<std::wstring> servo_names = { L"HEAD_X", L"HEAD_Y" };
 
-	pTrace->P7_INFO(hModule, TM("Launching service"));
-	mActiveFlag = true;
-	mCanDestroyThread = false;
-	mThreadIsAlive = true;
-	mpRunnerThr = new std::thread(&RobotHandlerService::runner, this);
-	pTrace->P7_INFO(hModule, TM("Service launched"));
+    if (!checkServos())
+        return;
 
-	return true;
+    const auto& config = *DefaultConfig::getInstance();
+
+    for (const auto& servo_name : servo_names)
+    {
+        int servoId = config.getServoId(servo_name);
+        if (servoId == -1)
+        {
+            pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+            continue;
+        }
+        if (!mServo[servoId])
+            pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+        else
+        {
+            auto pos = (unsigned int)config.getServoInitPos(servoId);
+            mServo[servoId]->enqueueTarget(pos, 200);
+        }
+    }
 }
 
-void RobotHandlerService::stop()
+void RobotHandler::headUp()
 {
-	BaseService::stop();
+    static std::wstring servo_name = L"HEAD_Y";
 
-	// Освобождение ресурсов
-	std::lock_guard<std::mutex> lk(mutCmd_);
-	if (mSerial.getConnectedComName() != L"")
-	{
-		std::queue<std::pair<int, int>>().swap(mCmdQ);
-		mSerial.disconnect();
-	}
+    if (!checkServos())
+        return;
+    
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).first;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::headDown()
+{
+    static std::wstring servo_name = L"HEAD_Y";
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).second;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::headLeft()
+{
+    static std::wstring servo_name = L"HEAD_X";
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).first;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::headRight()
+{
+    static std::wstring servo_name = L"HEAD_Y";
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).second;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::handsToCenter()
+{
+    static std::vector<std::wstring> servo_names = { L"HAND_L", L"HAND_R" };
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+
+    for (const auto& servo_name : servo_names)
+    {
+        int servoId = config.getServoId(servo_name);
+        if (servoId == -1)
+        {
+            pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+            continue;
+        }
+        if (!mServo[servoId])
+            pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+        else
+        {
+            auto pos = (unsigned int)config.getServoInitPos(servoId);
+            mServo[servoId]->enqueueTarget(pos, 200);
+        }
+    }
+}
+
+void RobotHandler::leftHandUp()
+{
+    static std::wstring servo_name = L"HAND_L";
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).first;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::leftHandDown()
+{
+    static std::wstring servo_name = L"HAND_L";
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).second;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::rightHandUp()
+{
+    static std::wstring servo_name = L"HAND_R";
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).first;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::rightHandDown()
+{
+    static std::wstring servo_name = L"HAND_R";
+
+    if (!checkServos())
+        return;
+
+    const auto& config = *DefaultConfig::getInstance();
+    int servoId = config.getServoId(servo_name);
+    if (servoId == -1)
+    {
+        pTrace->P7_WARNING(hModule, TM("Attempt to use unknown servo '%s'"), servo_name.c_str());
+        return;
+    }
+    if (!mServo[servoId])
+        pTrace->P7_WARNING(hModule, TM("Attempt to use uninitialized servo %d"), servoId);
+    else
+    {
+        auto pos = (unsigned int)config.getServoBounds(servoId).second;
+        mServo[servoId]->enqueueTarget(pos, 200);
+    }
+}
+
+void RobotHandler::flapHands()
+{
+    leftHandDown();
+    rightHandDown();
+
+    leftHandUp();
+    rightHandUp();
+
+    leftHandDown();
+    rightHandDown();
+}
+
+bool RobotHandler::launchServos(const std::wstring& comName)
+{
+    auto& config = *DefaultConfig::getInstance();
+    if (!config.isInitialized())
+    {
+        pTrace->P7_ERROR(hModule, TM("Can't launch. Config is not initialized"));
+        return false;
+    }
+
+    { // подключение к последовательному порту
+        const auto comNameChars = comName.c_str();
+        pTrace->P7_INFO(hModule, TM("Trying to open port '%s'"), comNameChars);
+        if (mSerial.connect(comName))
+            pTrace->P7_INFO(hModule, TM("Connected port '%s'"), comNameChars);
+        else
+            pTrace->P7_ERROR(hModule, TM("Port '%s' is busy, or unreachable"), comNameChars);
+    }
+    if (mSerial.getConnectedComName() == L"")
+        return false;
+    
+    int servos_up = 0;
+    { // запуск потоков сервоприводов
+        const int count = config.getServoCnt();
+        servos_up = count;
+        for (int i = 0; i < count; i++)
+        {
+            auto servoName = config.getServoName(i);
+            ServoService* servoService = nullptr;
+            if (servoName == L"")
+            {
+                pTrace->P7_WARNING(hModule, TM("Can't find name of servo%d"), i);
+                servos_up--;
+            }
+            else
+            {
+                servoService = new ServoService();
+                servoService->launch(servoName, mSerial);
+            }
+            
+            mServo.push_back(servoService);
+        }
+    }
+    pTrace->P7_INFO(hModule, TM("Launched services for %d/%d servos"), servos_up, config.getServoCnt());
+
+    return true;
 }

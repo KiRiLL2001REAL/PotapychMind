@@ -102,7 +102,10 @@
 #include "services/robotHandlerService.h"
 #include "imageCv2GlAdapter.h"
 #include "gui/cameraWindow.h"
-#include "ini/defaultConfig.h"
+#include "data/defaultConfig.h"
+#include "data/servoState.h"
+
+#include "devices/serial/serialPortWrapper.h"
 
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
@@ -155,9 +158,68 @@ static void Hook_Renderer_SwapBuffers(ImGuiViewport* viewport, void*)
         ::SwapBuffers(data->hDC);
 }
 
+//void servoTest()
+//{
+//    using namespace std::chrono_literals;
+//
+//    SerialPortWrapper serial;
+//    if (!serial.connect(L"\\\\.\\COM5"))
+//    {
+//        std::cout << "connection error\n";
+//        return;
+//    }
+//    std::cout << "connection estabilished\n";
+//    std::this_thread::sleep_for(2000ms);
+//
+//    unsigned char buffer[6];
+//    buffer[0] = 1;
+//    buffer[1] = 0;
+//    buffer[2] = 0;
+//    buffer[3] = 1;
+//
+//    for (int i = 0; i < 300; i++)
+//    {
+//        static const int max_val = 170;
+//
+//        float a = float(abs(float(i % 100) / 100 * max_val));
+//        unsigned char b;
+//        if ((i / 100) % 2)
+//            b = max_val - a;
+//        else
+//            b = a;
+//        buffer[4] = i % 6; // servo addr
+//
+//        switch (buffer[4])
+//        {
+//        case 0:
+//            break;
+//        case 1:
+//            b = max_val - b;
+//            break;
+//        case 2:
+//            break;
+//        case 3:
+//            b = max_val - b;
+//            break;
+//        case 4:
+//            break;
+//        }
+//
+//        buffer[5] = b;     // servo pos
+//        serial.write(buffer, 6);
+//        std::this_thread::sleep_for(10ms);
+//    }
+//
+//    serial.disconnect();
+//    std::cout << "disconnected\n";
+//}
+
 // Main code
 int main(int, char**)
 {
+    //servoTest();
+    //return 0;
+
     // Добавляем в консоль поддержку символов кириллицы (иначе вывод может внезапно повиснуть)
     std::wcout.imbue(std::locale("rus_rus.866"));
 
@@ -236,6 +298,14 @@ int main(int, char**)
 
 
 
+    // ========== Инициализация данных ==========
+
+    auto& servoState = *ServoState::getInstance();
+    servoState.init(config.getServoCnt());
+    servoState.setChangable(2, false);
+
+
+
     // ========== Инициализация камеры ==========
      
     CameraService cameraService;
@@ -265,11 +335,42 @@ int main(int, char**)
 
 
     // ========== Инициализация модуля управления роботом ==========
-    RobotHandlerService robotService;
-    if (!robotService.launch(L"\\\\.\\COM5"))
+
+    RobotHandler robotHandler;
+    if (!robotHandler.launchServos(L"\\\\.\\COM5"))
     {
         pTrace->P7_ERROR(hModule, TM("Can not start robotHandler."));
     }
+
+    //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    //
+    //robotHandler.headToCenter();
+    //
+    //robotHandler.headLeft();
+    //robotHandler.headRight();
+    //robotHandler.headUp();
+    //robotHandler.headDown();
+    //robotHandler.headToCenter();//
+    //robotHandler.headLeft();
+    //robotHandler.headUp();
+    //robotHandler.headRight();
+    //robotHandler.headDown();
+    //robotHandler.headToCenter();//
+    //
+    //robotHandler.handsToCenter();
+    //
+    //robotHandler.leftHandUp();
+    //robotHandler.leftHandDown();
+    //robotHandler.rightHandUp();
+    //robotHandler.rightHandDown();
+    //robotHandler.handsToCenter();//
+    //robotHandler.leftHandUp();
+    //robotHandler.rightHandUp();
+    //robotHandler.leftHandDown();
+    //robotHandler.rightHandDown();
+    //robotHandler.handsToCenter();//
+    //robotHandler.flapHands();
+    //robotHandler.handsToCenter();//
 
 
 
@@ -403,6 +504,19 @@ int main(int, char**)
             ImGui::RadioButton("Raw camera preview", &cameraWindowVisualization, 2);
         }
         ImGui::EndDisabled();
+        //ImGui::BeginDisabled();
+        //for (int i = 0; i < config.getServoCnt(); i++)
+        //{
+        //    const auto bounds = config.getServoBounds(i);
+        //    unsigned int min_val = bounds.first;
+        //    unsigned int max_val = bounds.second;
+        //    int current = servoState.getPosition(i);
+        //    if (ImGui::SliderInt("slider int", &current, min_val, max_val))
+        //    {
+        //        std::cout << "action\n";
+        //    }
+        //}
+        //ImGui::EndDisabled();
 
         if (cameraWindowOpened)
         {

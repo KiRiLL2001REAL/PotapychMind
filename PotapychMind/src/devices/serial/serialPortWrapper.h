@@ -1,4 +1,4 @@
-#include <string>
+#pragma once
 
 #define STRICT
 #include <tchar.h>

@@ -78,13 +78,19 @@
     <ClCompile Include="src\services\robotHandlerService.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\ini\internal\iniReader.cpp">
+    <ClCompile Include="src\internal\ini\iniReader.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\ini\internal\iniWriter.cpp">
+    <ClCompile Include="src\internal\ini\iniWriter.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\ini\defaultConfig.cpp">
+    <ClCompile Include="src\data\defaultConfig.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\services\servoService.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\servoState.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,16 +179,22 @@
     <ClInclude Include="src\services\robotHandlerService.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\ini\internal\iniDefaults.h">
+    <ClInclude Include="src\internal\ini\iniDefaults.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\ini\internal\iniReader.h">
+    <ClInclude Include="src\internal\ini\iniReader.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\ini\internal\iniWriter.h">
+    <ClInclude Include="src\internal\ini\iniWriter.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\ini\defaultConfig.h">
+    <ClInclude Include="src\data\defaultConfig.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\services\servoService.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\servoState.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

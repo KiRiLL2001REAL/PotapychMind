@@ -6,33 +6,39 @@
 #include <mutex>
 #include <queue>
 #include <string>
+#include <vector>
+#include "servoService.h"
 
-class RobotHandlerService : public BaseService
+class RobotHandler : public BaseService
 {
 protected:
-	std::mutex mutSerial_;
-	SerialPortWrapper mSerial;
+    SerialPortWrapper mSerial;
 
-	std::mutex mutCmd_;
-	std::queue<std::pair<int, int>> mCmdQ;
+    std::vector<ServoService*> mServo;
 
-	void popQ(std::pair<int, int>& dst);
-	virtual void runner();
+    bool checkServos() const;
+
+    virtual void runner();
 
 public:
-	RobotHandlerService();
-	~RobotHandlerService();
+    RobotHandler();
+    ~RobotHandler();
 
-	const std::wstring& getConnectedComPortName();
+    const std::wstring& getConnectedComPortName();
 
-	/*
-	first second explain
-	-1    n      wait for n millis
-	k>=0  x      translate k'th motor to position x
-	*/
-	void putCmd(const std::pair<int, int>& cmd);
+    void headToCenter();
+    void headUp();
+    void headDown();
+    void headLeft();
+    void headRight();
+    
+    void handsToCenter();
+    void leftHandUp();
+    void leftHandDown();
+    void rightHandUp();
+    void rightHandDown();
+    void flapHands();
 
-	bool launch(const std::wstring& comName);
-	virtual void stop();
+    bool launchServos(const std::wstring& comName);
 };
 

@@ -14,7 +14,7 @@ private:
     bool mInitialized;
     // ћьютекс на данные
     mutable std::shared_mutex mutData_;
-    
+
     // дефолтные значени€ камеры
     int mCameraId;
     std::pair<int, int> mCameraSize;
@@ -25,8 +25,8 @@ private:
     // сервоприводы
     int mServoCnt;
     std::map<std::wstring, int> mServoId;
-    std::vector<int> mServoInitPos;
-    std::vector<std::pair<int, int>> mServoBounds;
+    std::vector<unsigned int> mServoInitPos;
+    std::vector<std::pair<unsigned int, unsigned int>> mServoBounds;
 
     // указатель на синглтон
     static std::mutex mutInst_;
@@ -42,17 +42,21 @@ public:
     static DefaultConfig* getInstance();
 
     bool initialize(const std::wstring& cfg_filename);
+    bool isInitialized() const;
 
-    bool isInitialized();
-
-    int getCameraId();
-    std::pair<int, int> getCameraSize();
-    void getComPort(wchar_t* buf, size_t buf_length);
-    std::pair<int, int> getFaceEps();
-    int getServoCnt();
-    int getServoId(const std::wstring& servo_name);
-    int getServoInitPos(int id);
-    std::pair<int, int> getServoBounds(int id);
+    // camera
+    int getCameraId() const;
+    std::pair<int, int> getCameraSize() const;
+    // com
+    void getComPort(wchar_t* buf, size_t buf_length) const;
+    // face tracking
+    std::pair<int, int> getFaceEps() const;
+    // servos
+    int getServoCnt() const;
+    int getServoId(const std::wstring& servo_name) const;
+    const std::wstring& getServoName(int id) const; // вспомогательна€ функци€ на тех же данных, что и ::getServoId
+    unsigned int getServoInitPos(int id) const;
+    std::pair<unsigned int, unsigned int> getServoBounds(int id) const;
 
 };
 

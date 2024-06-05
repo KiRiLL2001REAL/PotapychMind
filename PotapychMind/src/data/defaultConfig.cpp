@@ -1,6 +1,6 @@
 #include "defaultConfig.h"
 
-#include "internal/iniReader.h"
+#include "../internal/ini/iniReader.h"
 #include <exception>
 
 DefaultConfig* DefaultConfig::mpInstance = nullptr;
@@ -27,8 +27,8 @@ DefaultConfig::~DefaultConfig()
     mCameraSize = mFaceEps = { -1, -1 };
     memset(mComPort, 0, sizeof(wchar_t) * 256);
     std::map<std::wstring, int>().swap(mServoId);
-    std::vector<int>().swap(mServoInitPos);
-    std::vector<std::pair<int, int>>().swap(mServoBounds);
+    mServoInitPos.clear();
+    mServoBounds.clear();
 }
 
 DefaultConfig* DefaultConfig::getInstance()
@@ -93,46 +93,48 @@ bool DefaultConfig::initialize(const std::wstring& cfg_filename)
         mServoBounds.push_back({ lower_bound , upper_bound });
     }
     rd.close();
+
+    return true;
 }
 
-bool DefaultConfig::isInitialized()
+bool DefaultConfig::isInitialized() const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     return mInitialized;
 }
 
-int DefaultConfig::getCameraId()
+int DefaultConfig::getCameraId() const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     return mCameraId;
 }
 
-std::pair<int, int> DefaultConfig::getCameraSize()
+std::pair<int, int> DefaultConfig::getCameraSize() const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     return mCameraSize;
 }
 
-void DefaultConfig::getComPort(wchar_t* buf, size_t buf_length)
+void DefaultConfig::getComPort(wchar_t* buf, size_t buf_length) const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     size_t length = buf_length < 256 ? buf_length : 256;
     memcpy(buf, mComPort, sizeof(wchar_t) * buf_length);
 }
 
-std::pair<int, int> DefaultConfig::getFaceEps()
+std::pair<int, int> DefaultConfig::getFaceEps() const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     return mFaceEps;
 }
 
-int DefaultConfig::getServoCnt()
+int DefaultConfig::getServoCnt() const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     return mServoCnt;
 }
 
-int DefaultConfig::getServoId(const std::wstring& servo_name)
+int DefaultConfig::getServoId(const std::wstring& servo_name) const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     auto it = mServoId.find(servo_name);
@@ -141,7 +143,22 @@ int DefaultConfig::getServoId(const std::wstring& servo_name)
     return -1;
 }
 
-int DefaultConfig::getServoInitPos(int id)
+const std::wstring& DefaultConfig::getServoName(int id) const
+{
+    std::shared_lock<std::shared_mutex> lk(mutData_);
+    auto elem = mServoId.end();
+    for (auto it = mServoId.begin(); it != mServoId.end(); it++)
+        if (it->second == id)
+        {
+            elem = it;
+            break;
+        }
+    if (elem != mServoId.end())
+        return elem->first;
+    return L"";
+}
+
+unsigned int DefaultConfig::getServoInitPos(int id) const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     if (id < 0 || id >= mServoInitPos.size())
@@ -149,7 +166,7 @@ int DefaultConfig::getServoInitPos(int id)
     return mServoInitPos[id];
 }
 
-std::pair<int, int> DefaultConfig::getServoBounds(int id)
+std::pair<unsigned int, unsigned int> DefaultConfig::getServoBounds(int id) const
 {
     std::shared_lock<std::shared_mutex> lk(mutData_);
     if (id < 0 || id >= mServoInitPos.size())

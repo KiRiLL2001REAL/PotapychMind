@@ -8,6 +8,7 @@
 #include <P7_Client.h>
 #include <P7_Trace.h>
 
+//TODO разделить на BaseService и Loggable
 class BaseService abstract
 {
 private:
