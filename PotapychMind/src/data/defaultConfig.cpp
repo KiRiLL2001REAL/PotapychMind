@@ -6,11 +6,12 @@
 DefaultConfig* DefaultConfig::mpInstance = nullptr;
 std::mutex DefaultConfig::mutInst_;
 
-DefaultConfig::DefaultConfig():
+DefaultConfig::DefaultConfig() :
     mInitialized(false),
     mCameraId(-1),
     mCameraSize(-1, -1),
     mFaceEps(-1, -1),
+    mFaceSize(std::vector<int>(3, 0)),
     mServoCnt(-1),
     mServoId(),
     mServoInitPos(),

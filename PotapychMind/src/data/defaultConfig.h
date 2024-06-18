@@ -22,6 +22,8 @@ private:
     wchar_t mComPort[256];
     // отслеживание лица
     std::pair<int, int> mFaceEps;
+    // распознавание лиц
+    std::vector<int> mFaceSize;
     // сервоприводы
     int mServoCnt;
     std::map<std::wstring, int> mServoId;

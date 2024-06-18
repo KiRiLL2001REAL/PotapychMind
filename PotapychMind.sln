@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.34601.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PotapychMind", "PotapychMind\PotapychMind.vcxproj", "{D3CD7D99-799F-4EDF-A779-AE92D9FBF857}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PotapychMind", "PotapychMind\PotapychMind.vcxproj", "{595DD883-8169-4D17-B5F1-E5825EC42232}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D3CD7D99-799F-4EDF-A779-AE92D9FBF857}.Debug|x64.ActiveCfg = Debug|x64
-		{D3CD7D99-799F-4EDF-A779-AE92D9FBF857}.Debug|x64.Build.0 = Debug|x64
-		{D3CD7D99-799F-4EDF-A779-AE92D9FBF857}.Release|x64.ActiveCfg = Release|x64
-		{D3CD7D99-799F-4EDF-A779-AE92D9FBF857}.Release|x64.Build.0 = Release|x64
+		{595DD883-8169-4D17-B5F1-E5825EC42232}.Debug|x64.ActiveCfg = Debug|x64
+		{595DD883-8169-4D17-B5F1-E5825EC42232}.Debug|x64.Build.0 = Debug|x64
+		{595DD883-8169-4D17-B5F1-E5825EC42232}.Release|x64.ActiveCfg = Release|x64
+		{595DD883-8169-4D17-B5F1-E5825EC42232}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {AC2EC575-A615-4C1D-8906-695A3DB9C6B6}
+		SolutionGuid = {3675AB9D-5302-4212-A0DD-37A9FE4E651D}
 	EndGlobalSection
 EndGlobal

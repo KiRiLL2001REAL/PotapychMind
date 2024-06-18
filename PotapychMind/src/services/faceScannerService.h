@@ -43,6 +43,7 @@ public:
 
     void getDetectionResult(cv::Mat& dstMat, std::vector<Face>& dstVec);
     void getDetectionResult(std::vector<Face>& dstVec);
+    void exprungeDetectionResult();
 
     bool launch();
     virtual void stop();

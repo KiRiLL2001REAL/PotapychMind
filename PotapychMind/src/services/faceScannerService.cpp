@@ -5,7 +5,9 @@
 #include "facedetectcnn.h"
 //define the buffer size. Do not change the size!
 //0x9000 = 1024 * (16 * 2 + 4), detect 1024 face at most
+#ifndef DETECT_BUFFER_SIZE
 #define DETECT_BUFFER_SIZE 0x9000
+#endif
 
 void FaceScannerService::getFrame(cv::Mat& dst)
 {
@@ -128,6 +130,13 @@ void FaceScannerService::getDetectionResult(std::vector<Face>& dstVec)
 {
     std::shared_lock<std::shared_mutex> lk(mutFaces_);
     dstVec = mCachedDetectionResult;
+}
+
+void FaceScannerService::exprungeDetectionResult()
+{
+    std::unique_lock<std::shared_mutex> lk(mutFaces_);
+    mCachedFrame.release();
+    mCachedDetectionResult.clear();
 }
 
 bool FaceScannerService::launch()

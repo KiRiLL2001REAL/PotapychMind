@@ -1,0 +1,39 @@
+{
+  "states": [
+    "statInit",
+    "statSearchFace",
+    "statStartMeeting",
+    "statNoAnswerForMeeting",
+    "statGotLost",
+    "statDeclined",
+    "statMeetingAccepted",
+    "statMeeting",
+    "statPresentation",
+    "statProposeMusic",
+    "statListenMusicAccepted",
+    "statListenMusicDeclined",
+    "statMayAskQuestion",
+    "statQuestionDeclined",
+    "statQuestion",
+    "statYesOnQuestion",
+    "statNoOnQuestion",
+    "statGoobye"
+  ],
+  "scenario": [
+    {
+      "state": "statInit",
+      "commands": [
+        { "type": "servo_action", "servo": "HEAD_X", "action": "to_center" },
+        { "type": "servo_action", "servo": "HEAD_Y", "action": "to_center" },
+        { "type": "servo_action", "servo": "HAND_L", "action": "to_center" },
+        { "type": "servo_action", "servo": "HAND_R", "action": "to_center" },
+        { "type": "servo_action", "servo": "HAND_L", "action": "flap" },
+        { "type": "servo_action", "servo": "HAND_R", "action": "flap" },
+        { "type": "servo_action", "servo": "HAND_L", "action": "to_center" },
+        { "type": "servo_action", "servo": "HAND_R", "action": "to_center" },
+        { "type": "internal", "what": "wait_servos" },
+        { "type": "internal", "what": "change_state", "state": "statSearchFace" }
+      ]
+    }
+  ]
+}
