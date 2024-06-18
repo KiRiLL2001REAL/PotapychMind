@@ -287,6 +287,23 @@ int main(int, char**)
 
     std::vector<Face> detectionResult = {};
 
+    //// ========== TMP ==========
+    //{
+    //    cv::Mat face1 = cv::imread(workingDirectory + "/resources/scarlett.jpg");
+    //    cv::Mat face2 = cv::imread(workingDirectory + "/resources/kirill.jpg");
+    //    faceScannerService.pushFrame(face2);
+    //    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    //    faceScannerService.getDetectionResult(detectionResult);
+    //
+    //    faceScannerService.intervieweeSet(face1);
+    //    faceScannerService.intervieweeRememberAndReset();
+    //    faceScannerService.intervieweeSet(face2);
+    //
+    //    face1.release();
+    //    face2.release();
+    //    detectionResult.clear();
+    //}
+
 
 
     // ========== Инициализация модуля управления роботом ==========
@@ -346,35 +363,6 @@ int main(int, char**)
         std::cout << "\tId: " << dev.id;
         std::wcout << L"\tName: " << dev.deviceName;
         std::wcout << L"\tPath: " << dev.devicePath << std::endl;
-    }
-
-
-
-    // ========== Модуль сравнения лиц ==========
-
-    FaceComparatorHandler faceComparator("resources/face_comparator");
-
-    // ========== ... и его проверка ==========
-    cv::Mat face1;
-    cv::Mat face2;
-
-    face1 = cv::imread("E:\\datasets\\faces\\cropped\\pins_Henry Cavil\\Henry Cavil98_1270.jpg");
-    face2 = cv::imread("E:\\datasets\\faces\\cropped\\pins_Chris Pratt\\Chris Pratt103_728.jpg");
-
-    { // preview
-        auto concatenated = concat_images(face1, face2);
-        
-        float similarity = faceComparator.equality(face1, face2);
-        char buf[32];
-        sprintf_s(buf, "%f", similarity);
-        cv::putText(concatenated,
-            std::string("similarity: ") + std::string(buf),
-            cv::Point(10, 20), cv::HersheyFonts::FONT_HERSHEY_PLAIN,
-            1.2, cv::Scalar(255, 255, 255), 1);
-
-        cv::imshow("faces", concatenated);
-        //cv::waitKey(0);
-        concatenated.release();
     }
 
 

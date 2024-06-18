@@ -2,6 +2,9 @@
 
 #include <exception>
 
+//#include <opencv2/imgproc.hpp>
+#include "../utility.h"
+
 #include "facedetectcnn.h"
 //define the buffer size. Do not change the size!
 //0x9000 = 1024 * (16 * 2 + 4), detect 1024 face at most
@@ -59,8 +62,10 @@ void FaceScannerService::runner()
         
         //!!! The input image must be a BGR one (three-channel) instead of RGB
         //!!! DO NOT RELEASE pResults !!!
-        pResults = facedetect_cnn(pBuffer, (unsigned char*)(frame.ptr(0)), frame.cols, frame.rows, (int)frame.step);
-        
+        pResults = facedetect_cnn(pBuffer,
+            (unsigned char*)(frame.ptr(0)),
+            frame.cols, frame.rows, (int)frame.step);
+
         detectionResult.clear();
         for (int i = 0; i < (pResults ? *pResults : 0); i++)
         {
@@ -72,12 +77,54 @@ void FaceScannerService::runner()
             int y = p[2];
             int w = p[3];
             int h = p[4];
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x + w >= frame.cols)
+                w = frame.cols - x - 1;
+            if (y + h >= frame.rows)
+                h = frame.rows - y - 1;
 
             Face face;
-            face.peopleClass = PeopleClass::Stranger;
             face.roi = cv::Rect(x, y, w, h);
+
+            face.peopleClass = PeopleClass::Stranger;
+            if (faceComparator.isKnownFace(frame(face.roi)))
+            {
+                face.peopleClass = PeopleClass::Familiar;
+            }
+
+            if (!mFaceInterviewee.empty() && faceComparator
+                .equality(frame(face.roi), mFaceInterviewee) >= 0.8)
+            {
+                face.peopleClass = PeopleClass::Interviewee;
+            }
+
             detectionResult.emplace_back(face);
         }
+
+        // если сетка обнаружила несколько интервьюируемых, нужно оставить одного.
+        int largestIntervieweeIdx = -1;
+        int largestArea = 0;
+        for (int i = 0; i < detectionResult.size(); i++)
+        {
+            const auto& dr = detectionResult[i];
+            if (dr.peopleClass == PeopleClass::Interviewee)
+            {
+                int area = dr.roi.area();
+                if (area > largestArea)
+                {
+                    largestArea = area;
+                    largestIntervieweeIdx = i;
+                }
+            }
+        }
+        for (int i = 0; i < detectionResult.size(); i++)
+        {
+            auto& dr = detectionResult[i];
+            if (dr.peopleClass == PeopleClass::Interviewee && largestIntervieweeIdx != i)
+                dr.peopleClass = PeopleClass::Familiar;
+        }
+
         storeDetectionResult(frame, detectionResult);
 
         spin();
@@ -95,7 +142,9 @@ void FaceScannerService::runner()
 FaceScannerService::FaceScannerService():
     BaseService("FaceScannerService"),
     mCachedDetectionResult(),
-    mFrameHandled(true)
+    mFrameHandled(true),
+    mFaceInterviewee(),
+    faceComparator(Utility::getWorkingDirectory() + "/resources/face_comparator")
 {
 }
 
@@ -109,6 +158,8 @@ FaceScannerService::~FaceScannerService()
     {
         std::lock_guard<std::mutex> lk(mutFrame_);
         mFrame.release();
+        std::lock_guard<std::mutex> lk2(_mutInterviewee);
+        mFaceInterviewee.release();
     }
 }
 
@@ -137,6 +188,32 @@ void FaceScannerService::exprungeDetectionResult()
     std::unique_lock<std::shared_mutex> lk(mutFaces_);
     mCachedFrame.release();
     mCachedDetectionResult.clear();
+}
+
+void FaceScannerService::intervieweeSet(cv::Mat face)
+{
+    std::lock_guard<std::mutex> lk(_mutInterviewee);
+    if (!mFaceInterviewee.empty())
+        mFaceInterviewee.release();
+    face.copyTo(mFaceInterviewee);
+    //cv::resize(face, mFaceInterviewee, cv::Size(92, 112));
+}
+
+void FaceScannerService::intervieweeReset()
+{
+    std::lock_guard<std::mutex> lk(_mutInterviewee);
+    if (!mFaceInterviewee.empty())
+        mFaceInterviewee.release();
+}
+
+void FaceScannerService::intervieweeRememberAndReset()
+{
+    std::lock_guard<std::mutex> lk(_mutInterviewee);
+    if (!mFaceInterviewee.empty())
+    {
+        faceComparator.rememberFace(mFaceInterviewee);
+        mFaceInterviewee.release();
+    }
 }
 
 bool FaceScannerService::launch()
